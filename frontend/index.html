@@ -4,241 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CV Analyzer</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #e0e0e0;
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-
-    h1 { text-align: center; font-size: 2rem; color: #fff; margin-bottom: 6px; }
-    .subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 40px; }
-
-    .form-card {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
-      padding: 32px;
-      max-width: 700px;
-      margin: 0 auto 40px;
-    }
-
-    label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 6px; }
-
-    input[type="file"], input[type="text"], textarea {
-      width: 100%;
-      background: #111;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      padding: 12px;
-      color: #e0e0e0;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-      outline: none;
-    }
-
-    input[type="text"]:focus, textarea:focus { border-color: #444; }
-    textarea { height: 120px; resize: vertical; }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #fff;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    button:disabled { background: #333; color: #666; cursor: not-allowed; }
-
-    .loading { text-align: center; color: #666; margin: 20px 0; display: none; font-size: 0.9rem; }
-
-    .erro {
-      background: #1a0f0f;
-      border: 1px solid #f44336;
-      color: #f44336;
-      padding: 14px;
-      border-radius: 8px;
-      max-width: 700px;
-      margin: 0 auto 20px;
-      display: none;
-    }
-
-    /* ABAS */
-    .abas-container { max-width: 700px; margin: 0 auto; display: none; }
-
-    .abas {
-      display: flex;
-      border-bottom: 1px solid #2a2a2a;
-      margin-bottom: 24px;
-    }
-
-    .aba {
-      padding: 12px 24px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      color: #666;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .aba:hover { color: #aaa; }
-    .aba.ativa { color: #fff; border-bottom-color: #fff; }
-
-    .aba-conteudo { display: none; }
-    .aba-conteudo.ativa { display: block; }
-
-    /* AGENTE HEADER */
-    .agente-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 24px;
-      padding: 20px;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
-    }
-
-    .agente-avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-
-    .avatar-tecnico { background: #1a1a2e; border: 1px solid #3d3d6e; }
-    .avatar-rh { background: #1a2e1a; border: 1px solid #3d6e3d; }
-    .avatar-juiz { background: #2e1a1a; border: 1px solid #6e3d3d; }
-
-    .agente-info { flex: 1; }
-    .agente-nome { font-size: 1rem; font-weight: 600; color: #fff; }
-    .agente-cargo { font-size: 0.8rem; color: #666; margin-top: 2px; }
-
-    .agente-score { text-align: right; }
-    .score-num { font-size: 1.8rem; font-weight: 700; }
-    .score-label { font-size: 0.7rem; color: #666; }
-
-    .score-alto { color: #4caf50; }
-    .score-medio { color: #ff9800; }
-    .score-baixo { color: #f44336; }
-
-    /* BARRA */
-    .score-bar { height: 4px; background: #2a2a2a; border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
-    .score-fill { height: 100%; border-radius: 2px; }
-
-    /* CARD */
-    .card {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-
-    .section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #555; margin-bottom: 10px; }
-
-    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; }
-    .tag-verde { background: #0d1f0d; color: #4caf50; border: 1px solid #1e3d1e; }
-    .tag-vermelho { background: #1f0d0d; color: #f44336; border: 1px solid #3d1e1e; }
-    .tag-azul { background: #0d0d1f; color: #64b5f6; border: 1px solid #1e1e3d; }
-
-    .lista { padding-left: 18px; }
-    .lista li { font-size: 0.88rem; color: #bbb; line-height: 1.6; margin-bottom: 6px; }
-
-    .veredicto {
-      background: #111;
-      border-left: 3px solid #333;
-      padding: 14px;
-      border-radius: 0 8px 8px 0;
-      font-size: 0.88rem;
-      color: #bbb;
-      line-height: 1.7;
-    }
-
-    /* JUIZ */
-    .chance-container { text-align: center; padding: 24px 0; }
-    .chance-num { font-size: 4rem; font-weight: 700; }
-    .chance-desc { color: #666; font-size: 0.85rem; margin-top: 4px; }
-
-    .decisao {
-      text-align: center;
-      padding: 14px;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-
-    .decisao-sim { background: #0d1f0d; color: #4caf50; border: 1px solid #1e3d1e; }
-    .decisao-nao { background: #1f0d0d; color: #f44336; border: 1px solid #3d1e1e; }
-    .decisao-ressalva { background: #1f1a0d; color: #ff9800; border: 1px solid #3d2e1e; }
-
-    .sim-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #1a1a1a; }
-    .sim-item:last-child { border-bottom: none; }
-    .sim-icon { font-size: 1.1rem; min-width: 20px; padding-top: 2px; }
-    .sim-titulo { font-size: 0.88rem; font-weight: 600; margin-bottom: 4px; }
-    .sim-motivo { font-size: 0.82rem; color: #888; line-height: 1.5; }
-
-    /* PLANO DE AÇÃO */
-    .plano-container {
-      max-width: 700px;
-      margin: 32px auto 0;
-      display: none;
-    }
-
-    .plano-titulo {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #2a2a2a;
-    }
-
-    .plano-item {
-      display: flex;
-      gap: 14px;
-      padding: 14px 0;
-      border-bottom: 1px solid #1a1a1a;
-      align-items: flex-start;
-    }
-
-    .plano-num {
-      width: 24px;
-      height: 24px;
-      background: #2a2a2a;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      color: #888;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .plano-texto { font-size: 0.88rem; color: #bbb; line-height: 1.6; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>CV Analyzer 🎯</h1>
+  <h1>CV Analyzer</h1>
   <p class="subtitle">3 agentes de IA simulando um processo seletivo real</p>
 
   <div class="form-card">
@@ -254,24 +24,21 @@
     <button id="btn" onclick="analisar()">Analisar</button>
   </div>
 
-  <div class="loading" id="loading">⏳ Analisando com 3 agentes... isso pode levar alguns segundos.</div>
+  <div class="loading" id="loading">Analisando com 3 agentes... isso pode levar alguns segundos.</div>
   <div class="erro" id="erro"></div>
 
-  <!-- ABAS -->
   <div class="abas-container" id="abas-container">
     <div class="abas">
-      <div class="aba ativa" onclick="trocarAba('tecnico')">⚙️ Técnico</div>
-      <div class="aba" onclick="trocarAba('rh')">🤝 RH</div>
-      <div class="aba" onclick="trocarAba('juiz')">⚖️ Juiz</div>
+      <div class="aba ativa" onclick="trocarAba('tecnico')">Técnico</div>
+      <div class="aba" onclick="trocarAba('rh')">RH</div>
+      <div class="aba" onclick="trocarAba('juiz')">Juiz</div>
     </div>
 
-    <!-- ABA TÉCNICO -->
     <div class="aba-conteudo ativa" id="tab-tecnico">
       <div class="agente-header">
-        <div class="agente-avatar avatar-tecnico">⚙️</div>
+        <div class="agente-avatar">T</div>
         <div class="agente-info">
-          <div class="agente-nome">Rafael Mendes</div>
-          <div class="agente-cargo">Líder de Tecnologia · 15 anos de experiência</div>
+          <div class="agente-nome">Técnico</div>
         </div>
         <div class="agente-score">
           <div class="score-num" id="score-tecnico">—</div>
@@ -282,13 +49,11 @@
       <div id="conteudo-tecnico"></div>
     </div>
 
-    <!-- ABA RH -->
     <div class="aba-conteudo" id="tab-rh">
       <div class="agente-header">
-        <div class="agente-avatar avatar-rh">🤝</div>
+        <div class="agente-avatar">RH</div>
         <div class="agente-info">
-          <div class="agente-nome">Camila Rocha</div>
-          <div class="agente-cargo">Líder de RH Estratégico · 12 anos de experiência</div>
+          <div class="agente-nome">RH</div>
         </div>
         <div class="agente-score">
           <div class="score-num" id="score-rh">—</div>
@@ -299,13 +64,11 @@
       <div id="conteudo-rh"></div>
     </div>
 
-    <!-- ABA JUIZ -->
     <div class="aba-conteudo" id="tab-juiz">
       <div class="agente-header">
-        <div class="agente-avatar avatar-juiz">⚖️</div>
+        <div class="agente-avatar">J</div>
         <div class="agente-info">
-          <div class="agente-nome">André Costa</div>
-          <div class="agente-cargo">Hiring Manager · Dono da vaga</div>
+          <div class="agente-nome">Juiz</div>
         </div>
         <div class="agente-score">
           <div class="score-num" id="score-juiz">—</div>
@@ -317,9 +80,8 @@
     </div>
   </div>
 
-  <!-- PLANO DE AÇÃO -->
   <div class="plano-container" id="plano-container">
-    <div class="plano-titulo">🗂️ Plano de Ação</div>
+    <div class="plano-titulo">Plano de ação do Juiz</div>
     <div id="plano-itens"></div>
   </div>
 
@@ -337,7 +99,7 @@
     }
 
     function barCor(s) {
-      return s >= 70 ? '#4caf50' : s >= 40 ? '#ff9800' : '#f44336';
+      return s >= 70 ? '#1d7a4c' : s >= 40 ? '#8a5a00' : '#b3261e';
     }
 
     function tags(lista, cls) {
@@ -388,7 +150,6 @@
 
         const { tecnico, rh, juiz } = data;
 
-        // TÉCNICO
         setScore('score-tecnico', 'bar-tecnico', tecnico.score_tecnico);
         document.getElementById('conteudo-tecnico').innerHTML = `
           <div class="card">
@@ -404,12 +165,11 @@
             ${itens(tecnico.projetos_relevantes)}
           </div>
           <div class="card">
-            <div class="section-label">Parecer do Rafael</div>
+            <div class="section-label">Parecer</div>
             <div class="veredicto">${tecnico.parecer}</div>
           </div>
         `;
 
-        // RH
         setScore('score-rh', 'bar-rh', rh.score_rh);
         document.getElementById('conteudo-rh').innerHTML = `
           <div class="card">
@@ -429,12 +189,11 @@
             </div>
           </div>
           <div class="card">
-            <div class="section-label">Parecer da Camila</div>
+            <div class="section-label">Parecer</div>
             <div class="veredicto">${rh.parecer}</div>
           </div>
         `;
 
-        // JUIZ
         setScore('score-juiz', 'bar-juiz', juiz.score_final);
         const decisaoClasse = juiz.decisao.includes('NÃO') ? 'decisao-nao' : juiz.decisao.includes('RESSALVA') ? 'decisao-ressalva' : 'decisao-sim';
         document.getElementById('conteudo-juiz').innerHTML = `
@@ -468,12 +227,11 @@
             </div>
           </div>
           <div class="card">
-            <div class="section-label">Veredicto do André</div>
+            <div class="section-label">Veredicto final</div>
             <div class="veredicto">${juiz.veredicto_final}</div>
           </div>
         `;
 
-        // PLANO DE AÇÃO
         const plano = juiz.o_que_mudar_agora;
         document.getElementById('plano-itens').innerHTML = plano.map((item, i) => `
           <div class="plano-item">
