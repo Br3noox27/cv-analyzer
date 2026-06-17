@@ -5,25 +5,47 @@ import os
 import json
 import anthropic 
 import fitz  # PyMuPDF
-from fastapi import FastAPI, File, UploadFile, Form 
 
+from fastapi import FastAPI, File, UploadFile, Form 
 from prompts import PROMPT_TECNICO, PROMPT_RH, PROMPT_JUIZ
+from scraper import extrair_texto_url
 
 app = FastAPI()
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 @app.get('/health')
 def health():
-    return {'Status': 'Ok'}
+    return {'Status': 200}
 
 @app.post('/analisar')
 async def analisar(
     cv_file : UploadFile = File(...),
-    job_text: str = Form(...)
+    job_text: str = Form(...),
+    job_url: str = Form(default="")
 ):
 
+    # Valida se é PDF
+    if cv_file.content_type != 'application/pdf':
+        return {'erro': 'o arquivo enviado não é um pdf'}
+
+    # Valida tamanho — máximo 5MB
     contents = await cv_file.read()
-    doc = fitz.open(stream=contents, filetype = 'pdf')
+    if len(contents) > 5 * 1024 * 1024:
+        return{"erro": "PDF muito grande. Limite é 5MB."}
+    
+    # Valida se forneceu vaga
+    if not job_text.strip():
+        return {"erro": "O texto da vaga não pode estar vazio."}
+    
+    # Se veio URL, faz scraping
+    if job_url.strip():
+        try:
+            job_text = await extrair_texto_url(job_url)
+        except Exception as e: 
+            return {"erro": "Não foi possível acessar a URL da vaga. Sites como LinkedIn, Indeed e Glassdoor bloqueiam acesso automático. Copie o texto da vaga e cole no campo job_text."}
+
+    
+    doc = fitz.open(stream=contents, filetype='pdf')
     cv_text = ""
 
     for page in doc: 
