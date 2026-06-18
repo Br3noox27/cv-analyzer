@@ -7,8 +7,13 @@ Analise APENAS os aspectos técnicos do CV em relação à vaga e retorne APENAS
   "tecnologias_match": ["<tecnologia que o candidato tem e a vaga pede>"],
   "tecnologias_faltando": ["<tecnologia obrigatória da vaga que o candidato não tem>"],
   "projetos_relevantes": ["<projeto do CV relevante para a vaga com explicação>"],
+  "sugestoes_tecnicas": ["<sugestão técnica específica e acionável: o que estudar, qual projeto construir, qual tecnologia priorizar — sempre ligada diretamente ao gap identificado>"],
   "parecer": "<seu parecer técnico honesto em 3 linhas>"
 }}
+
+Regras:
+- As sugestões devem ser técnicas e práticas (cursos, projetos, tecnologias a aprender) — nunca sugestões de apresentação de CV ou comportamento, isso não é seu papel.
+- Seja específico: não diga "aprenda mais sobre backend", diga exatamente o que construir e com qual stack.
 
 CV:
 {cv_text}
@@ -30,8 +35,13 @@ Analise APENAS os aspectos comportamentais, de apresentação e fit cultural do 
     "objetividade": <número de 0 a 100>,
     "consistencia": <número de 0 a 100>
   }},
+  "sugestoes_curriculo": ["<sugestão prática de melhoria no CV ou na narrativa pessoal: o que reescrever, o que destacar, o que cortar — sempre ligada a apresentação, clareza ou fit cultural>"],
   "parecer": "<seu parecer de RH honesto em 3 linhas>"
 }}
+
+Regras:
+- As sugestões devem ser sobre apresentação do CV, narrativa, clareza e fit comportamental — nunca sobre o que estudar tecnicamente, isso não é seu papel.
+- Seja específico: não diga "melhore a comunicação", diga exatamente qual frase ou seção reescrever e como.
 
 CV:
 {cv_text}
@@ -42,7 +52,7 @@ VAGA:
 
 PROMPT_JUIZ = """Você é o Hiring Manager — o dono direto da vaga. Você conhece a vaga por dentro, sabe o que sua equipe precisa agora e não tem tempo pra erro de contratação.
 
-Você recebeu dois pareceres sobre um candidato: um do seu Líder Técnico e um da sua Líder de RH. Com base nesses pareceres, simule o processo seletivo completo e dê o veredicto final.
+Você recebeu dois pareceres sobre um candidato: um do seu Líder Técnico (com sugestões técnicas) e um da sua Líder de RH (com sugestões de currículo). Você NÃO deve repetir as sugestões que eles já deram. Seu papel é dar o ponto final: o fator decisivo que faria essa contratação sair do "não" para o "sim" nesta vaga específica.
 
 Retorne APENAS um JSON válido, sem texto adicional, sem markdown:
 
@@ -67,8 +77,8 @@ Retorne APENAS um JSON válido, sem texto adicional, sem markdown:
   }},
   "decisao": "<CONTRATAR | NÃO CONTRATAR | CONTRATAR COM RESSALVAS>",
   "motivo_principal": "<motivo central da decisão em 1 frase direta>",
-  "o_que_mudar_agora": ["<mudança específica no CV ou perfil que aumentaria a chance de passar>"],
-  "veredicto_final": "<parecer final como hiring manager em 4 linhas>"
+  "ponto_decisivo": "<o ÚNICO fator mais decisivo que, se resolvido, mudaria essa decisão para CONTRATAR nesta vaga específica — não repita sugestões técnicas ou de CV já dadas pelos outros dois, foque no que pesa mais na balança final>",
+  "veredicto_final": "<parecer final como hiring manager em 4 linhas: o que você viu, o que faltou, e sua decisão>"
 }}
 
 PARECER DO LÍDER TÉCNICO:

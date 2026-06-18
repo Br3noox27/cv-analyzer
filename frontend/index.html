@@ -8,30 +8,40 @@
 </head>
 <body>
 
-  <h1>CV Analyzer</h1>
-  <p class="subtitle">3 agentes de IA simulando um processo seletivo real</p>
+  <div class="hero">
+    <div class="hero-eyebrow">🎯 Antes de aplicar, simule a entrevista</div>
+    <h1>Esse currículo passa<br>nessa vaga?</h1>
+    <p class="subtitle">Envie seu PDF e a vaga. Três avaliadores de IA — Técnico, RH e o Hiring Manager — simulam o processo seletivo completo e te dizem a chance real de contratação.</p>
+
+    <div class="pills">
+      <span class="pill">⚙️ Avaliação técnica</span>
+      <span class="pill">🤝 Avaliação de RH</span>
+      <span class="pill">⚖️ Veredicto do contratante</span>
+    </div>
+  </div>
 
   <div class="form-card">
-    <label>Currículo (PDF)</label>
-    <input type="file" id="cv_file" accept=".pdf">
+    <label class="upload-zone" id="upload-zone" for="cv_file">
+      <div class="upload-icon">↑</div>
+      <div class="upload-texto" id="upload-texto">Clique para enviar seu currículo em PDF</div>
+      <div class="upload-sub">Máximo 5MB</div>
+    </label>
+    <input type="file" id="cv_file" accept=".pdf" style="display:none">
 
-    <label>URL da Vaga (opcional)</label>
-    <input type="text" id="job_url" placeholder="https://...">
+    <label class="campo-label">Cole o texto da vaga</label>
+    <textarea id="job_text" placeholder="Cole aqui a descrição completa da vaga..."></textarea>
 
-    <label>Texto da Vaga</label>
-    <textarea id="job_text" placeholder="Cole aqui o texto da vaga..."></textarea>
-
-    <button id="btn" onclick="analisar()">Analisar</button>
+    <button id="btn" onclick="analisar()">Simular processo seletivo</button>
   </div>
 
   <div class="loading" id="loading">Analisando com 3 agentes... isso pode levar alguns segundos.</div>
   <div class="erro" id="erro"></div>
 
   <div class="abas-container" id="abas-container">
-    <div class="abas">
-      <div class="aba ativa" onclick="trocarAba('tecnico')">Técnico</div>
-      <div class="aba" onclick="trocarAba('rh')">RH</div>
-      <div class="aba" onclick="trocarAba('juiz')">Juiz</div>
+    <div class="carrossel-indicador">
+      <span class="ponto ativo" id="ponto-tecnico"></span>
+      <span class="ponto" id="ponto-rh"></span>
+      <span class="ponto" id="ponto-juiz"></span>
     </div>
 
     <div class="aba-conteudo ativa" id="tab-tecnico">
@@ -77,21 +87,59 @@
       </div>
       <div class="score-bar"><div class="score-fill" id="bar-juiz"></div></div>
       <div id="conteudo-juiz"></div>
+    </div>
 
-      <div class="plano-container" id="plano-container">
-        <div class="plano-titulo">Plano de ação do Juiz</div>
-        <div id="plano-itens"></div>
-      </div>
+    <div class="carrossel-nav">
+      <button class="btn-nav" id="btn-anterior" onclick="navegar(-1)" disabled>← Anterior</button>
+      <button class="btn-nav btn-nav-principal" id="btn-proximo" onclick="navegar(1)">Próximo →</button>
     </div>
   </div>
 
   <script>
-    function trocarAba(nome) {
-      document.querySelectorAll('.aba').forEach((a, i) => {
-        a.classList.toggle('ativa', ['tecnico','rh','juiz'][i] === nome);
-      });
-      document.querySelectorAll('.aba-conteudo').forEach(c => c.classList.remove('ativa'));
-      document.getElementById('tab-' + nome).classList.add('ativa');
+    document.getElementById('cv_file').addEventListener('change', function() {
+      const texto = document.getElementById('upload-texto');
+      const zona = document.getElementById('upload-zone');
+      if (this.files[0]) {
+        texto.textContent = this.files[0].name;
+        zona.classList.add('upload-preenchido');
+      } else {
+        texto.textContent = 'Clique para enviar seu currículo em PDF';
+        zona.classList.remove('upload-preenchido');
+      }
+    });
+
+    const ORDEM = ['tecnico', 'rh', 'juiz'];
+    let indiceAtual = 0;
+
+    function irPara(indice) {
+      const atualEl = document.getElementById('tab-' + ORDEM[indiceAtual]);
+      const novoEl = document.getElementById('tab-' + ORDEM[indice]);
+      const direcao = indice > indiceAtual ? 1 : -1;
+
+      atualEl.classList.add(direcao > 0 ? 'saindo-esquerda' : 'saindo-direita');
+      atualEl.classList.remove('ativa');
+
+      setTimeout(() => {
+        atualEl.classList.remove('saindo-esquerda', 'saindo-direita');
+      }, 300);
+
+      novoEl.classList.add('ativa', direcao > 0 ? 'entrando-direita' : 'entrando-esquerda');
+      setTimeout(() => {
+        novoEl.classList.remove('entrando-direita', 'entrando-esquerda');
+      }, 300);
+
+      document.querySelectorAll('.ponto').forEach((p, i) => p.classList.toggle('ativo', i === indice));
+
+      indiceAtual = indice;
+      document.getElementById('btn-anterior').disabled = indiceAtual === 0;
+      document.getElementById('btn-proximo').textContent = indiceAtual === ORDEM.length - 1 ? 'Ver veredicto final' : 'Próximo →';
+      document.getElementById('btn-proximo').onclick = indiceAtual === ORDEM.length - 1 ? null : () => navegar(1);
+    }
+
+    function navegar(direcao) {
+      const novoIndice = indiceAtual + direcao;
+      if (novoIndice < 0 || novoIndice >= ORDEM.length) return;
+      irPara(novoIndice);
     }
 
     function cor(s) {
@@ -122,21 +170,18 @@
     async function analisar() {
       const cv = document.getElementById('cv_file').files[0];
       const jobText = document.getElementById('job_text').value;
-      const jobUrl = document.getElementById('job_url').value;
 
       if (!cv) { alert('Selecione o PDF do currículo.'); return; }
-      if (!jobText && !jobUrl) { alert('Preencha o texto da vaga ou a URL.'); return; }
+      if (!jobText.trim()) { alert('Cole o texto da vaga.'); return; }
 
       document.getElementById('btn').disabled = true;
       document.getElementById('loading').style.display = 'block';
       document.getElementById('erro').style.display = 'none';
       document.getElementById('abas-container').style.display = 'none';
-      document.getElementById('plano-container').style.display = 'none';
 
       const form = new FormData();
       form.append('cv_file', cv);
       form.append('job_text', jobText);
-      form.append('job_url', jobUrl);
 
       try {
         const res = await fetch('http://localhost:8000/analisar', { method: 'POST', body: form });
@@ -164,6 +209,10 @@
             <div class="section-label">Projetos relevantes</div>
             ${itens(tecnico.projetos_relevantes)}
           </div>
+          <div class="card card-destaque">
+            <div class="section-label">O que estudar agora</div>
+            ${itens(tecnico.sugestoes_tecnicas)}
+          </div>
           <div class="card">
             <div class="section-label">Parecer</div>
             <div class="veredicto">${tecnico.parecer}</div>
@@ -187,6 +236,10 @@
               <span class="tag tag-azul">Objetividade: ${rh.apresentacao_cv.objetividade}/100</span>
               <span class="tag tag-azul">Consistência: ${rh.apresentacao_cv.consistencia}/100</span>
             </div>
+          </div>
+          <div class="card card-destaque">
+            <div class="section-label">O que reescrever agora</div>
+            ${itens(rh.sugestoes_curriculo)}
           </div>
           <div class="card">
             <div class="section-label">Parecer</div>
@@ -230,19 +283,19 @@
             <div class="section-label">Veredicto final</div>
             <div class="veredicto">${juiz.veredicto_final}</div>
           </div>
+          <div class="card card-decisivo">
+            <div class="section-label">O ponto decisivo</div>
+            <p class="ponto-decisivo-texto">${juiz.ponto_decisivo}</p>
+          </div>
         `;
 
-        const plano = juiz.o_que_mudar_agora;
-        document.getElementById('plano-itens').innerHTML = plano.map((item, i) => `
-          <div class="plano-item">
-            <div class="plano-num">${i + 1}</div>
-            <div class="plano-texto">${item}</div>
-          </div>
-        `).join('');
-
         document.getElementById('abas-container').style.display = 'block';
-        document.getElementById('plano-container').style.display = 'block';
-        trocarAba('tecnico');
+        indiceAtual = 0;
+        document.querySelectorAll('.aba-conteudo').forEach((el, i) => el.classList.toggle('ativa', i === 0));
+        document.querySelectorAll('.ponto').forEach((p, i) => p.classList.toggle('ativo', i === 0));
+        document.getElementById('btn-anterior').disabled = true;
+        document.getElementById('btn-proximo').textContent = 'Próximo →';
+        document.getElementById('btn-proximo').onclick = () => navegar(1);
 
       } catch (e) {
         document.getElementById('erro').textContent = 'Erro ao conectar com a API. Verifique se o servidor está rodando.';

@@ -30,7 +30,6 @@ def health():
 async def analisar(
     cv_file : UploadFile = File(...),
     job_text: str = Form(...),
-    job_url: str = Form(default="")
 ):
 
     # Valida se é PDF
@@ -46,13 +45,6 @@ async def analisar(
     if not job_text.strip():
         return {"erro": "O texto da vaga não pode estar vazio."}
     
-    # Se veio URL, faz scraping
-    if job_url.strip():
-        try:
-            job_text = await extrair_texto_url(job_url)
-        except Exception as e: 
-            return {"erro": "Não foi possível acessar a URL da vaga. Sites como LinkedIn, Indeed e Glassdoor bloqueiam acesso automático. Copie o texto da vaga e cole no campo job_text."}
-
     
     doc = fitz.open(stream=contents, filetype='pdf')
     cv_text = ""
@@ -65,7 +57,7 @@ async def analisar(
 
     msg_tecnico = client.messages.create(
         model='claude-sonnet-4-6',
-        max_tokens=1000,
+        max_tokens=1500,
         messages=[{"role": "user", "content": PROMPT_TECNICO.format(cv_text=cv_text, job_text=job_text)}]
     )
 
@@ -79,7 +71,7 @@ async def analisar(
 
     msg_rh = client.messages.create(
         model='claude-sonnet-4-6',
-        max_tokens=1000,
+        max_tokens=1500,
         messages=[{"role": "user", "content": PROMPT_RH.format(cv_text=cv_text, job_text=job_text)}]
     )
     raw_rh = msg_rh.content[0].text.strip()
